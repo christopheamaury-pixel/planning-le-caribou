@@ -1,0 +1,15 @@
+[
+  {
+    "id": "excel-1",
+    "name": "Loic Chobriat",
+    "arrival": "2026-12-19",
+    "departure": "2026-12-26",
+    "nights": 7,
+    "guests": 2,
+    "price": 945.21,
+    "source": "Airbnb",
+    "status": "Réservé",
+    "notes": "Importé depuis le planning Excel"
+  }
+]
+``
