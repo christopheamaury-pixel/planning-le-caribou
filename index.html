@@ -67,12 +67,13 @@ async function loadBookings(){
 
 try{
 
-const response = await fetch("reservations.json");
-6
-bookings = await response.json();
-7
-render();
-8
+const response = await fetch("reservations.json")
+  .then(response => response.json())
+  .then(data => {
+      bookings = data;
+      render();
+  });
+
 }catch(e){
 9
 bookings = defaultBookings;
