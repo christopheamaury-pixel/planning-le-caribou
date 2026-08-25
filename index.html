@@ -61,7 +61,29 @@ let cursor=new Date(2026,11,1), filter="all", selected=null;
 const defaultBookings=[
  {id:"excel-1",name:"Loic Chobriat",arrival:"2026-12-19",departure:"2026-12-26",nights:7,guests:2,price:945.21,source:"Airbnb",status:"Réservé",notes:"Importé depuis le planning Excel"}
 ];
-let bookings=JSON.parse(localStorage.getItem("airbnbBookings")||"null")||defaultBookings;
+let bookings=[];
+2
+ 
+3
+async function loadBookings(){
+4
+try{
+5
+const response = await fetch("reservations.json");
+6
+bookings = await response.json();
+7
+render();
+8
+}catch(e){
+9
+bookings = defaultBookings;
+10
+render();
+11
+}
+12
+}
 
 const holidays=[
  ["2026-12-19","2027-01-03","A"],["2026-12-19","2027-01-03","B"],["2026-12-19","2027-01-03","C"],
@@ -159,6 +181,6 @@ document.getElementById("fileInput").onchange=async e=>{
  toast("Le format du planning actuel est conservé comme modèle. Pour une synchronisation complète, il faut relier précisément ses cellules.");
 };
 if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
-render();
+loadBookings();
 </script>
 </body></html>
