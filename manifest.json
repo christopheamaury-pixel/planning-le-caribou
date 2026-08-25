@@ -1,0 +1,10 @@
+{
+  "name":"Planning Airbnb",
+  "short_name":"Planning Airbnb",
+  "start_url":"./index.html",
+  "display":"standalone",
+  "background_color":"#f4f6f9",
+  "theme_color":"#0b57d0",
+  "orientation":"portrait",
+  "icons":[]
+}

@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#0b57d0">
+<title>Planning Airbnb</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{--blue:#0b57d0;--bg:#f4f6f9;--card:#fff;--text:#172033;--muted:#6b7280;--green:#dff5e5;--red:#ffe0df;--yellow:#fff3c7;--line:#e5e7eb}
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}button{border:0}.app{max-width:900px;margin:auto;min-height:100vh;padding-bottom:90px}
+header{position:sticky;top:0;z-index:5;background:rgba(244,246,249,.94);backdrop-filter:blur(18px);padding:18px 16px 10px}
+.top{display:flex;align-items:center;justify-content:space-between}.title{font-size:23px;font-weight:750}.sub{font-size:13px;color:var(--muted);margin-top:2px}
+.iconbtn{width:42px;height:42px;border-radius:14px;background:#fff;box-shadow:0 1px 5px #00000012;color:var(--blue);font-size:23px}
+.nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:14px}.nav button{background:#fff;border-radius:12px;padding:9px 12px;color:var(--blue)}
+.month{font-weight:700;font-size:18px}.today{padding:9px 13px!important}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;margin:10px 14px;padding:14px;box-shadow:0 3px 12px #00000008}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin:8px 14px}.dot{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:5px}.available{background:var(--green)}.reserved{background:var(--red)}.holiday{background:var(--yellow)}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.dow{font-size:11px;text-align:center;color:var(--muted);font-weight:650;padding:4px}.day{min-height:76px;border:1px solid var(--line);border-radius:11px;background:#fff;padding:7px;position:relative;cursor:pointer}.day.empty{background:transparent;border:0}.num{font-weight:700;font-size:13px}.day .badge{position:absolute;left:5px;right:5px;bottom:5px;border-radius:7px;padding:4px;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.day.holidayzone{box-shadow:inset 0 -4px 0 #f3d477}.day.res{background:#fff0ef;border-color:#ffc7c3}.day.block{background:#f0f1f3}.day.selected{outline:2px solid var(--blue)}
+.section-title{font-weight:750;font-size:15px;margin-bottom:10px}.booking{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-top:1px solid var(--line)}.booking:first-of-type{border-top:0}.bname{font-weight:700}.bmeta{font-size:12px;color:var(--muted);margin-top:3px}.price{font-weight:700}.fab{position:fixed;right:20px;bottom:24px;width:58px;height:58px;border-radius:20px;background:var(--blue);color:white;font-size:30px;box-shadow:0 8px 25px #0b57d055}
+.modal{position:fixed;inset:0;background:#0006;z-index:20;display:none;align-items:flex-end}.modal.show{display:flex}.sheet{background:#fff;border-radius:25px 25px 0 0;width:100%;max-height:92vh;overflow:auto;padding:20px 18px calc(25px + env(safe-area-inset-bottom))}.sheet h2{margin:0 0 15px}.field{margin:12px 0}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px}.field input,.field select,.field textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;background:#fff}.actions{display:flex;gap:10px;margin-top:18px}.primary{background:var(--blue);color:#fff;border-radius:12px;padding:13px 16px;flex:1;font-weight:700}.secondary{background:#eef2f7;color:#273449;border-radius:12px;padding:13px 16px}.danger{background:#ffe7e5;color:#c62828;border-radius:12px;padding:13px 16px;width:100%;margin-top:10px}
+.detail .big{font-size:24px;font-weight:800}.row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}.row:last-child{border-bottom:0}.muted{color:var(--muted)}
+.toolbar{display:flex;gap:8px;margin:10px 14px;flex-wrap:wrap}.toolbar button{background:#fff;border:1px solid var(--line);border-radius:11px;padding:9px 11px;color:#334155}
+.toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:#172033;color:#fff;padding:10px 14px;border-radius:12px;display:none;z-index:30;font-size:13px}
+@media(min-width:700px){.modal{align-items:center;justify-content:center}.sheet{width:520px;border-radius:24px}.day{min-height:105px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="top"><div><div class="title">Planning Airbnb</div><div class="sub">Calendrier des réservations</div></div><button class="iconbtn" id="importBtn" title="Importer Excel">⇩</button></div>
+  <div class="nav"><button id="prev">‹</button><div class="month" id="monthLabel"></div><button id="next">›</button><button class="today" id="today">Aujourd’hui</button></div>
+</header>
+<div class="toolbar">
+  <button data-filter="all">Toutes</button><button data-filter="A">Zone A</button><button data-filter="B">Zone B</button><button data-filter="C">Zone C</button>
+  <button id="exportBtn">Exporter Excel</button>
+</div>
+<div class="legend">
+  <span><i class="dot available"></i>Libre</span>
+  <span><i class="dot reserved"></i>Réservé</span>
+  <span><i class="dot holiday"></i>Vacances scolaires</span>
+</div>
+<main class="card"><div class="grid" id="calendar"></div></main>
+<section class="card"><div class="section-title">Réservations du mois</div><div id="bookings"></div></section>
+<button class="fab" id="addBtn">+</button>
+<input id="fileInput" type="file" accept=".xlsx,.xls" hidden>
+</div>
+
+<div class="modal" id="modal"><div class="sheet" id="sheet"></div></div>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>
+const months=["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+const dow=["Lun","Mar","Mer","Jeu","Ven","Sam","Dim"];
+let cursor=new Date(2026,11,1), filter="all", selected=null;
+
+const defaultBookings=[
+ {id:"excel-1",name:"Loic Chobriat",arrival:"2026-12-19",departure:"2026-12-26",nights:7,guests:2,price:945.21,source:"Airbnb",status:"Réservé",notes:"Importé depuis le planning Excel"}
+];
+let bookings=JSON.parse(localStorage.getItem("airbnbBookings")||"null")||defaultBookings;
+
+const holidays=[
+ ["2026-12-19","2027-01-03","A"],["2026-12-19","2027-01-03","B"],["2026-12-19","2027-01-03","C"],
+ ["2027-02-06","2027-02-21","C"],["2027-02-13","2027-02-28","A"],["2027-02-20","2027-03-07","B"],
+ ["2027-04-03","2027-04-18","C"],["2027-04-10","2027-04-25","A"],["2027-04-17","2027-05-02","B"]
+];
+
+function iso(d){return d.toISOString().slice(0,10)}
+function fmt(s){return new Intl.DateTimeFormat("fr-FR",{day:"numeric",month:"long",year:"numeric"}).format(new Date(s+"T12:00:00"))}
+function inMonth(s){let d=new Date(s+"T12:00:00");return d.getFullYear()==cursor.getFullYear()&&d.getMonth()==cursor.getMonth()}
+function holidayFor(s){return holidays.filter(h=>s>=h[0]&&s<=h[1]).map(h=>h[2])}
+function bookingFor(s){return bookings.find(b=>s>=b.arrival&&s<b.departure)}
+function save(){localStorage.setItem("airbnbBookings",JSON.stringify(bookings))}
+function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style.display="block";setTimeout(()=>e.style.display="none",1800)}
+
+function render(){
+ document.getElementById("monthLabel").textContent=months[cursor.getMonth()]+" "+cursor.getFullYear();
+ let cal=document.getElementById("calendar"); cal.innerHTML=dow.map(x=>`<div class="dow">${x}</div>`).join("");
+ let first=new Date(cursor.getFullYear(),cursor.getMonth(),1), offset=(first.getDay()+6)%7, days=new Date(cursor.getFullYear(),cursor.getMonth()+1,0).getDate();
+ for(let i=0;i<offset;i++)cal.innerHTML+=`<div class="day empty"></div>`;
+ for(let n=1;n<=days;n++){
+   let d=new Date(cursor.getFullYear(),cursor.getMonth(),n), s=iso(d), b=bookingFor(s), hz=holidayFor(s);
+   let cls="day"+(b?" res":"")+(hz.length?" holidayzone":"");
+   let badge=b?`<div class="badge reserved">${b.name}</div>`:(hz.length?`<div class="badge holiday">Vac. ${hz.join(" · ")}</div>`:`<div class="badge available">Libre</div>`);
+   cal.innerHTML+=`<div class="${cls}" data-date="${s}"><div class="num">${n}</div>${badge}</div>`;
+ }
+ cal.querySelectorAll(".day[data-date]").forEach(e=>e.onclick=()=>openDate(e.dataset.date));
+ let list=bookings.filter(b=>inMonth(b.arrival)||inMonth(b.departure)|| (b.arrival<iso(new Date(cursor.getFullYear(),cursor.getMonth()+1,0))&&b.departure>iso(first))).filter(b=>filter==="all"||holidayFor(b.arrival).includes(filter));
+ document.getElementById("bookings").innerHTML=list.length?list.map(b=>`<div class="booking" onclick="openDetail('${b.id}')"><div><div class="bname">${b.name}</div><div class="bmeta">${fmt(b.arrival)} → ${fmt(b.departure)} · ${b.nights||nights(b.arrival,b.departure)} nuits</div></div><div class="price">${Number(b.price||0).toLocaleString("fr-FR",{minimumFractionDigits:2})} €</div></div>`).join(""):`<div class="muted">Aucune réservation sur ce mois.</div>`;
+}
+function nights(a,b){return Math.round((new Date(b)-new Date(a))/86400000)}
+function openDate(s){let b=bookingFor(s); b?openDetail(b.id):openForm(null,s)}
+function openDetail(id){
+ selected=bookings.find(b=>b.id===id);
+ document.getElementById("sheet").innerHTML=`<h2>Réservation</h2>
+ <div class="detail"><div class="big">${selected.name}</div><p class="muted">${fmt(selected.arrival)} → ${fmt(selected.departure)}</p>
+ <div class="row"><span>Nombre de nuits</span><b>${selected.nights||nights(selected.arrival,selected.departure)}</b></div>
+ <div class="row"><span>Voyageurs</span><b>${selected.guests||"—"}</b></div>
+ <div class="row"><span>Prix total</span><b>${Number(selected.price||0).toLocaleString("fr-FR",{minimumFractionDigits:2})} €</b></div>
+ <div class="row"><span>Source</span><b>${selected.source||"—"}</b></div>
+ <div class="row"><span>Statut</span><b>${selected.status||"Réservé"}</b></div>
+ <div class="row"><span>Notes</span><span>${selected.notes||"—"}</span></div></div>
+ <div class="actions"><button class="secondary" onclick="closeModal()">Fermer</button><button class="primary" onclick="openForm('${selected.id}')">Modifier</button></div>
+ <button class="danger" onclick="removeBooking('${selected.id}')">Supprimer la réservation</button>`;
+ document.getElementById("modal").classList.add("show");
+}
+function openForm(id=null,date=""){
+ selected=id?bookings.find(b=>b.id===id):null;
+ let b=selected||{name:"",arrival:date,departure:date?iso(new Date(new Date(date+"T12:00:00").getTime()+86400000*1)):"",nights:"",guests:"",price:"",source:"Airbnb",status:"Réservé",notes:""};
+ document.getElementById("sheet").innerHTML=`<h2>${selected?"Modifier la réservation":"Nouvelle réservation"}</h2>
+ <div class="field"><label>Nom du voyageur</label><input id="f_name" value="${b.name}"></div>
+ <div class="field"><label>Arrivée</label><input id="f_arrival" type="date" value="${b.arrival}"></div>
+ <div class="field"><label>Départ</label><input id="f_departure" type="date" value="${b.departure}"></div>
+ <div class="field"><label>Voyageurs</label><input id="f_guests" type="number" min="1" value="${b.guests||""}"></div>
+ <div class="field"><label>Prix total (€)</label><input id="f_price" type="number" step="0.01" value="${b.price||""}"></div>
+ <div class="field"><label>Source</label><select id="f_source"><option ${b.source==="Airbnb"?"selected":""}>Airbnb</option><option>Booking</option><option>Direct</option><option>Autre</option></select></div>
+ <div class="field"><label>Statut</label><select id="f_status"><option ${b.status==="Réservé"?"selected":""}>Réservé</option><option ${b.status==="Bloqué"?"selected":""}>Bloqué</option></select></div>
+ <div class="field"><label>Notes</label><textarea id="f_notes" rows="3">${b.notes||""}</textarea></div>
+ <div class="actions"><button class="secondary" onclick="closeModal()">Annuler</button><button class="primary" onclick="saveForm('${id||""}')">Enregistrer</button></div>`;
+ document.getElementById("modal").classList.add("show");
+}
+function saveForm(id){
+ let a=document.getElementById("f_arrival").value,d=document.getElementById("f_departure").value;
+ if(!a||!d||d<=a){toast("Vérifie les dates");return}
+ let obj={id:id||"r-"+Date.now(),name:document.getElementById("f_name").value||"Sans nom",arrival:a,departure:d,nights:nights(a,d),guests:document.getElementById("f_guests").value,price:document.getElementById("f_price").value,source:document.getElementById("f_source").value,status:document.getElementById("f_status").value,notes:document.getElementById("f_notes").value};
+ if(id){let i=bookings.findIndex(x=>x.id===id);bookings[i]=obj}else bookings.push(obj);save();closeModal();render();toast("Réservation enregistrée");
+}
+function removeBooking(id){if(confirm("Supprimer cette réservation ?")){bookings=bookings.filter(x=>x.id!==id);save();closeModal();render();toast("Réservation supprimée")}}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+document.getElementById("prev").onclick=()=>{cursor.setMonth(cursor.getMonth()-1);render()}
+document.getElementById("next").onclick=()=>{cursor.setMonth(cursor.getMonth()+1);render()}
+document.getElementById("today").onclick=()=>{let d=new Date();cursor=new Date(d.getFullYear(),d.getMonth(),1);render()}
+document.getElementById("addBtn").onclick=()=>openForm()
+document.querySelectorAll("[data-filter]").forEach(b=>b.onclick=()=>{filter=b.dataset.filter;render()})
+document.getElementById("modal").onclick=e=>{if(e.target.id==="modal")closeModal()}
+
+document.getElementById("exportBtn").onclick=()=>{
+ if(!window.XLSX){toast("Module Excel indisponible");return}
+ let rows=[["Nom","Arrivée","Départ","Nuits","Voyageurs","Prix","Source","Statut","Notes"],...bookings.map(b=>[b.name,b.arrival,b.departure,b.nights||nights(b.arrival,b.departure),b.guests,b.price,b.source,b.status,b.notes])];
+ let ws=XLSX.utils.aoa_to_sheet(rows), wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Réservations");XLSX.writeFile(wb,"Planning_Airbnb_export.xlsx");toast("Fichier Excel créé");
+}
+document.getElementById("importBtn").onclick=()=>document.getElementById("fileInput").click();
+document.getElementById("fileInput").onchange=async e=>{
+ let file=e.target.files[0]; if(!file)return;
+ if(!window.XLSX){toast("Module Excel indisponible");return}
+ let data=await file.arrayBuffer(), wb=XLSX.read(data), ws=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:""});
+ // Import générique si le classeur contient une ligne avec les colonnes attendues.
+ let header=ws.findIndex(r=>r.some(v=>String(v).toLowerCase().includes("nom"))&&r.some(v=>String(v).toLowerCase().includes("arriv")));
+ if(header>=0){
+  let h=ws[header].map(v=>String(v).toLowerCase());
+  let idx=(name)=>h.findIndex(x=>x.includes(name));
+  let imported=ws.slice(header+1).map(r=>({id:"imp-"+Math.random(),name:r[idx("nom")],arrival:r[idx("arriv")],departure:r[idx("départ")]||r[idx("depart")],nights:r[idx("nuit")],guests:r[idx("voy")],price:r[idx("prix")],source:r[idx("source")],status:r[idx("statut")]||"Réservé",notes:r[idx("note")]})).filter(b=>b.name&&b.arrival&&b.departure);
+  if(imported.length){bookings=imported;save();render();toast(imported.length+" réservation(s) importée(s)");return}
+ }
+ toast("Le format du planning actuel est conservé comme modèle. Pour une synchronisation complète, il faut relier précisément ses cellules.");
+};
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+render();
+</script>
+</body></html>
