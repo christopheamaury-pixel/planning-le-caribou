@@ -12,4 +12,26 @@
     "notes": "Importé depuis le planning Excel"
   }
 ]
-``
+"id": "test-2",
+16
+"name": "Test",
+17
+"arrival": "2026-12-10",
+18
+"departure": "2026-12-12",
+19
+"nights": 2,
+20
+"guests": 2,
+21
+"price": 200,
+22
+"source": "Direct",
+23
+"status": "Réservé",
+24
+"notes": ""
+25
+}
+26
+]
