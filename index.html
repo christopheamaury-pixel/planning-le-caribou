@@ -96,7 +96,7 @@ function fmt(s){return new Intl.DateTimeFormat("fr-FR",{day:"numeric",month:"lon
 function inMonth(s){let d=new Date(s+"T12:00:00");return d.getFullYear()==cursor.getFullYear()&&d.getMonth()==cursor.getMonth()}
 function holidayFor(s){return holidays.filter(h=>s>=h[0]&&s<=h[1]).map(h=>h[2])}
 function bookingFor(s){return bookings.find(b=>s>=b.arrival&&s<b.departure)}
-function save(){localStorage.setItem("airbnbBookings",JSON.stringify(bookings))}
+function save(){}
 function toast(t){let e=document.getElementById("toast");e.textContent=t;e.style.display="block";setTimeout(()=>e.style.display="none",1800)}
 
 function render(){
